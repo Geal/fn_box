@@ -2,7 +2,7 @@
 
 name = "fn_box"
 description = "Box up your FnOnces"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Nathan Zadoks <nathan@nathan7.eu>"]
 license = "CC0-1.0"
 repository = "https://github.com/nathan7/fn_box"
