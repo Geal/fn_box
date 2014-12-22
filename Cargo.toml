@@ -1,0 +1,5 @@
+[package]
+
+name = "fn_box"
+version = "1.0.0"
+authors = ["Nathan Zadoks <nathan@nathan7.eu>"]
