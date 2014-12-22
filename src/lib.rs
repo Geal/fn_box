@@ -3,6 +3,12 @@ pub trait FnBox<Args, Result = ()> {
   extern "rust-call" fn call_box(self: Box<Self>, args: Args) -> Result;
 }
 
+impl<'a> FnOnce() for Box<FnBox() + 'a> {
+  extern "rust-call" fn call_once(self, args: ()) {
+    self.call_box(args)
+  }
+}
+
 #[cfg(when_coherence_is_fixed)]
 impl<'a, Args, Result> FnOnce<Args, Result> for Box<FnBox<Args, Result> + 'a> {
   extern "rust-call" fn call_once(self, args: Args) -> Result {
