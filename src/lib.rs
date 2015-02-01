@@ -1,23 +1,27 @@
-#![feature(unboxed_closures)]
-pub trait FnBox<Args, Result = ()> {
-  extern "rust-call" fn call_box(self: Box<Self>, args: Args) -> Result;
+#![feature(unboxed_closures, core)]
+pub trait FnBox<Args> {
+  type Output = ();
+  extern "rust-call" fn call_box(self: Box<Self>, args: Args) -> Self::Output;
 }
 
-impl<'a> FnOnce() for Box<FnBox() + 'a> {
+impl<'a> FnOnce<()> for Box<FnBox() + 'a> {
+  type Output = ();
   extern "rust-call" fn call_once(self, args: ()) {
     self.call_box(args)
   }
 }
 
 #[cfg(when_coherence_is_fixed)]
-impl<'a, Args, Result> FnOnce<Args, Result> for Box<FnBox<Args, Result> + 'a> {
+impl<'a, Args, Result> FnOnce<Args> for Box<FnBox<Args, Output = Result> + 'a> {
+  type Output = Result;
   extern "rust-call" fn call_once(self, args: Args) -> Result {
     self.call_box(args)
   }
 }
 
-impl<F, Args, Result> FnBox<Args, Result> for F where F: FnOnce<Args, Result> {
-  extern "rust-call" fn call_box(self: Box<F>, args: Args) -> Result {
+impl<F, Args> FnBox<Args> for F where F: FnOnce<Args> {
+  type Output = <F as FnOnce<Args>>::Output;
+  extern "rust-call" fn call_box(self: Box<F>, args: Args) -> <F as FnOnce<Args>>::Output {
     (*self).call_once(args)
   }
 }
@@ -31,7 +35,7 @@ fn can_be_boxed() {
 #[test]
 fn can_be_sent() {
   let f = move |:| {};
-  let _: Box<FnBox<()> + Send> = Box::new(f);
+  let _: Box<FnBox() + Send> = Box::new(f);
 }
 
 #[test]
