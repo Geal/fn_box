@@ -28,13 +28,13 @@ impl<F, Args> FnBox<Args> for F where F: FnOnce<Args> {
 
 #[test]
 fn can_be_boxed() {
-  let f = move |:| {};
+  let f = move || {};
   let _: Box<FnBox()> = Box::new(f);
 }
 
 #[test]
 fn can_be_sent() {
-  let f = move |:| {};
+  let f = move || {};
   let _: Box<FnBox() + Send> = Box::new(f);
 }
 
@@ -43,7 +43,7 @@ fn can_be_called() {
   let mut called = false;
 
   {
-    let f: Box<FnBox()> = Box::new(|:| { called = true });
+    let f: Box<FnBox()> = Box::new(|| { called = true });
 
     f();
   }
@@ -53,18 +53,18 @@ fn can_be_called() {
 
 #[test]
 fn can_be_called_with_args() {
-  let f: Box<FnBox(i32)> = Box::new(move |:x: i32| { assert_eq!(x, 3) });
+  let f: Box<FnBox(i32)> = Box::new(move |x: i32| { assert_eq!(x, 3) });
   f.call_box((3,));
 }
 
 #[test]
 fn can_return_values() {
-  let f: Box<FnBox() -> i32> = Box::new(move |:| 3);
+  let f: Box<FnBox() -> i32> = Box::new(move || 3);
   assert_eq!(f.call_box(()), 3);
 }
 
 #[test]
 fn everything() {
-  let f: Box<FnBox(_) -> _> = Box::new(move |:x: i32| x + 1);
+  let f: Box<FnBox(_) -> _> = Box::new(move |x: i32| x + 1);
   assert_eq!(f.call_box((3,)), 4);
 }
